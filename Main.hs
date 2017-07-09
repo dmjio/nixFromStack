@@ -11,13 +11,14 @@ import           Data.IORef
 import           Data.List.Split
 import           Data.Map                                (Map)
 import qualified Data.Map                                as M
--- import qualified Data.Text.Lazy                          as T
 import           Distribution.Nixpkgs.Haskell.Derivation
 import           System.Environment
 import           System.Exit
 import           System.IO
 import           System.Process
-import           Text.Pretty.Simple
+-- import           Text.Pretty.Simple
+-- import qualified Data.Text as T
+-- import qualified Data.Text.IO as T
 
 main :: IO ()
 main = do
@@ -27,7 +28,7 @@ main = do
   args <- getArgs
   rawDeps <- map (go . splitOn " ")
             <$> lines
-            <$> readProcess "stack" [ "list-dependencies" ] []
+            <$> readProcess "stack" [ "list-dependencies", "--system-ghc" ] []
   deps <- flip filterM rawDeps $ \(x,y) ->
     case y of
       "<unknown>" -> do
@@ -63,9 +64,7 @@ main = do
   forM_ [ k | Left k <- errors ] $ \(k,m) ->
     hPutStrLn stderr $ "Error in: " ++ concat k ++ ", messsage: " ++ m
   dmap <- M.toList <$> readIORef ref
---  let str = T.unpack $ T.intercalate "\n" (map pShow dmap)
---  print $ "{ " ++ str ++ " }"
-  forM_ dmap $ \(_, d) -> pPrint d
+--  T.writeFile "default.nix" (T.concat (map (\(k,d) -> pText d) dmap))
   unless (length errors == 0) exitFailure
     where
       go [x,y] = (x,y)
