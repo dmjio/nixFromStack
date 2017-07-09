@@ -1,6 +1,10 @@
 # nixFromStack
 Generate nix expressions from stack files (wip)
 
+Suitable for use with [`makePackageSet`](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-modules/lib.nix#L4)
+as defined [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-modules/default.nix#L15)
+
+
 ## Usage
 ```bash
 ./nixFromStack +RTS -N > stackage-packages.nix
