@@ -1,0 +1,28 @@
+name:                nixFromStack
+version:             0.1.0.0
+synopsis:            Generate nix expressions from stack files
+homepage:            github.com/dmjio/nixFromStack
+license:             BSD3
+license-file:        LICENSE
+author:              David Johnson
+maintainer:          djohnson.m@gmail.com
+copyright:           David Johnson (c) 2017
+category:            Development
+build-type:          Simple
+extra-source-files:  ChangeLog.md
+cabal-version:       >=1.10
+
+executable nixFromStack
+  main-is:             Main.hs
+  ghc-options:         -threaded -Wall
+  build-depends:       async
+                     , base >=4.9 && <4.10
+                     , cabal2nix
+                     , containers
+                     , directory
+                     , language-nix
+                     , pretty-simple
+                     , process
+                     , split
+                     , text
+  default-language:    Haskell2010
