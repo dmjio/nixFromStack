@@ -1,5 +1,5 @@
 { mkDerivation, async, base, cabal2nix, containers, directory
-, language-nix, pretty-simple, process, split, stdenv
+, language-nix, pretty, pretty-simple, process, split, stdenv, text
 }:
 mkDerivation {
   pname = "nixFromStack";
@@ -8,8 +8,8 @@ mkDerivation {
   isLibrary = false;
   isExecutable = true;
   executableHaskellDepends = [
-    async base cabal2nix containers directory language-nix
-    pretty-simple process split
+    async base cabal2nix containers directory language-nix pretty
+    pretty-simple process split text
   ];
   homepage = "github.com/dmjio/nixFromStack";
   description = "Generate nix expressions from stack files";

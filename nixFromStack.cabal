@@ -21,6 +21,7 @@ executable nixFromStack
                      , containers
                      , directory
                      , language-nix
+                     , pretty
                      , pretty-simple
                      , process
                      , split

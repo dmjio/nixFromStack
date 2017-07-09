@@ -16,14 +16,12 @@ import           System.Environment
 import           System.Exit
 import           System.IO
 import           System.Process
-import           Text.Pretty.Simple
--- import qualified Data.Text as T
--- import qualified Data.Text.IO as T
+import           Text.PrettyPrint.HughesPJClass          ( Pretty(..) )
 
 main :: IO ()
 main = do
   n <- getNumCapabilities
-  putStrLn $ "Capabilities: " ++ show n
+  hPutStrLn stderr $ "Capabilities: " ++ show n
   hSetBuffering stderr LineBuffering
   args <- getArgs
   rawDeps <- map (go . splitOn " ")
@@ -64,8 +62,13 @@ main = do
   forM_ [ k | Left k <- errors ] $ \(k,m) ->
     hPutStrLn stderr $ "Error in: " ++ concat k ++ ", messsage: " ++ m
   dmap <- M.toList <$> readIORef ref
---  T.writeFile "default.nix" (T.concat (map (\(k,d) -> pText d) dmap))
-  forM_ dmap pPrint
+  let xs = flip map dmap $ \(name, d) -> do
+        show name ++ " = callPackage (" ++ show (pPrint d) ++ ");\n"
+      prelude = unlines [ "/* stackage-packages.nix is an auto-generated file -- DO NOT EDIT! */"
+                        , "{ pkgs, stdenv, callPackage }:"
+                        , "self: {"
+                        ]
+  putStrLn $ prelude ++ concat xs ++ "}"
   unless (length errors == 0) exitFailure
     where
       go [x,y] = (x,y)
