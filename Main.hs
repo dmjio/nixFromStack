@@ -16,7 +16,7 @@ import           System.Environment
 import           System.Exit
 import           System.IO
 import           System.Process
--- import           Text.Pretty.Simple
+import           Text.Pretty.Simple
 -- import qualified Data.Text as T
 -- import qualified Data.Text.IO as T
 
@@ -28,7 +28,7 @@ main = do
   args <- getArgs
   rawDeps <- map (go . splitOn " ")
             <$> lines
-            <$> readProcess "stack" [ "list-dependencies", "--system-ghc" ] []
+            <$> readProcess "stack" [ "list-dependencies", "--no-system-ghc", "--skip-ghc-check" ] []
   deps <- flip filterM rawDeps $ \(x,y) ->
     case y of
       "<unknown>" -> do
@@ -65,6 +65,7 @@ main = do
     hPutStrLn stderr $ "Error in: " ++ concat k ++ ", messsage: " ++ m
   dmap <- M.toList <$> readIORef ref
 --  T.writeFile "default.nix" (T.concat (map (\(k,d) -> pText d) dmap))
+  forM_ dmap pPrint
   unless (length errors == 0) exitFailure
     where
       go [x,y] = (x,y)
