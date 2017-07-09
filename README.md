@@ -116,3 +116,4 @@ Error in: cabal://nixFromStack-0.1.0.0, messsage: ExitFailure 1
 Error in: cabal://rts-1.0, messsage: ExitFailure 1
 ```
 
+Generated nix [here](https://github.com/dmjio/nixFromStack/blob/master/stackage-packages.nix)
