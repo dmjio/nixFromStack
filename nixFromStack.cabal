@@ -21,6 +21,7 @@ executable nixFromStack
                      , containers
                      , directory
                      , language-nix
+                     , lens
                      , pretty
                      , pretty-simple
                      , process
