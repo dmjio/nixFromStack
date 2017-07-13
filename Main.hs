@@ -8,10 +8,13 @@ import           Control.Concurrent.Async
 import           Control.Exception
 import           Control.Monad
 import           Data.IORef
+import           Data.List
 import           Data.List.Split
 import           Data.Map                                (Map)
 import qualified Data.Map                                as M
+import           Data.Maybe
 import           Distribution.Nixpkgs.Haskell.Derivation
+import           System.Directory
 import           System.Environment
 import           System.Exit
 import           System.IO
@@ -24,15 +27,20 @@ main = do
   hPutStrLn stderr $ "Capabilities: " ++ show n
   hSetBuffering stderr LineBuffering
   args <- getArgs
+  cabalFile <- listToMaybe . filter ("cabal" `isSuffixOf`) <$> getDirectoryContents "."
+  cabalFileName <- case cabalFile of
+    Nothing -> error "Couldn't find cabal file in cwd"
+    Just cabal -> pure . head $ splitOn "." cabal
   rawDeps <- map (go . splitOn " ")
             <$> lines
             <$> readProcess "stack" [ "list-dependencies", "--no-system-ghc", "--skip-ghc-check" ] []
-  deps <- flip filterM rawDeps $ \(x,y) ->
+  deps <- flip filterM rawDeps $ \(x,y) -> do
     case y of
       "<unknown>" -> do
          hPutStrLn stderr $ "Couldn't find version for: " ++ x
          pure False
-      _ -> pure True
+      _ | any (x ==) [cabalFileName, "rts"] -> pure False
+        | otherwise -> pure True
   pct <- newIORef (0 :: Integer)
   ref <- newIORef mempty :: IO (IORef (Map String Derivation))
   errors <- concat <$> do

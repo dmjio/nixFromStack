@@ -345,24 +345,6 @@ mkDerivation {
   description = "Convert Cabal files into Nix build instructions";
   license = stdenv.lib.licenses.bsd3;
 });
-"cereal" = callPackage ({ mkDerivation, array, base, bytestring, containers, ghc-prim
-, QuickCheck, stdenv, test-framework, test-framework-quickcheck2
-}:
-mkDerivation {
-  pname = "cereal";
-  version = "0.5.4.0";
-  sha256 = "1rzyr8r9pjlgas5pc8n776r22i0ficanq05ypqrs477jxxd6rjns";
-  libraryHaskellDepends = [
-    array base bytestring containers ghc-prim
-  ];
-  testHaskellDepends = [
-    base bytestring QuickCheck test-framework
-    test-framework-quickcheck2
-  ];
-  homepage = "https://github.com/GaloisInc/cereal";
-  description = "A binary serialization library";
-  license = stdenv.lib.licenses.bsd3;
-});
 "comonad" = callPackage ({ mkDerivation, base, Cabal, cabal-doctest, containers
 , contravariant, distributive, doctest, semigroups, stdenv, tagged
 , transformers, transformers-compat
@@ -448,16 +430,6 @@ mkDerivation {
     array base HUnit test-framework test-framework-hunit
   ];
   description = "Deep evaluation of data structures";
-  license = stdenv.lib.licenses.bsd3;
-});
-"directory" = callPackage ({ mkDerivation, base, filepath, stdenv, time, unix }:
-mkDerivation {
-  pname = "directory";
-  version = "1.3.0.0";
-  sha256 = "11ykplzx1kljcj0vsj8ly9m2hj3nmsj487xdly7b8rq15chxi71n";
-  libraryHaskellDepends = [ base filepath time unix ];
-  testHaskellDepends = [ base filepath time unix ];
-  description = "Platform-agnostic library for filesystem operations";
   license = stdenv.lib.licenses.bsd3;
 });
 "distribution-nixpkgs" = callPackage ({ mkDerivation, aeson, base, bytestring, Cabal, containers, deepseq
@@ -751,6 +723,26 @@ mkDerivation {
   ];
   homepage = "https://github.com/basvandijk/lifted-base";
   description = "lifted IO operations from the base library";
+  license = stdenv.lib.licenses.bsd3;
+});
+"math-functions" = callPackage ({ mkDerivation, base, deepseq, erf, HUnit, primitive, QuickCheck
+, stdenv, test-framework, test-framework-hunit
+, test-framework-quickcheck2, vector, vector-th-unbox
+}:
+mkDerivation {
+  pname = "math-functions";
+  version = "0.2.1.0";
+  sha256 = "1sv5vabsx332v1lpb6v3jv4zrzvpx1n7yprzd8wlcda5vsc5a6zp";
+  libraryHaskellDepends = [
+    base deepseq primitive vector vector-th-unbox
+  ];
+  testHaskellDepends = [
+    base deepseq erf HUnit primitive QuickCheck test-framework
+    test-framework-hunit test-framework-quickcheck2 vector
+    vector-th-unbox
+  ];
+  homepage = "https://github.com/bos/math-functions";
+  description = "Special functions and Chebyshev polynomials";
   license = stdenv.lib.licenses.bsd3;
 });
 "mmorph" = callPackage ({ mkDerivation, base, mtl, stdenv, transformers
