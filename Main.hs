@@ -6,6 +6,7 @@ import           Cabal2nix                               hiding (main)
 import           Control.Concurrent
 import           Control.Concurrent.Async
 import           Control.Exception
+import           Control.Lens
 import           Control.Monad
 import           Data.IORef
 import           Data.List
@@ -43,6 +44,10 @@ main = do
         | otherwise -> pure True
   pct <- newIORef (0 :: Integer)
   ref <- newIORef mempty :: IO (IORef (Map String Derivation))
+  let moreDeps =  ["hscolour", "jailbreak-cabal", "cabal-doctest", "happy", "stringbuilder"]
+  forM_ moreDeps $ \(depName :: String) -> do
+    let argsFormatted = args ++ [toCabal' depName]
+    runCabal2Nix ref argsFormatted depName
   errors <- concat <$> do
     forM (chunksOf n deps) $ \deps' -> do
       currentDep <- readIORef pct
@@ -55,23 +60,13 @@ main = do
       forConcurrently deps' $ \(p,v) -> do
         let argsFormatted = args ++ [toCabal p v]
         hPutStrLn stderr $ last argsFormatted
-        result <- try $ cabal2nix' argsFormatted
-        case result of
-          Left (e :: SomeException) -> do
-            pure $ Left (argsFormatted,  show e)
-          Right d ->
-            case d of
-              Left _ ->
-                pure $ Left (argsFormatted,  "Incorrect arguments to cabal2nix")
-              Right d' -> do
-                modifyIORef' ref (M.insert p d')
-                pure $ Right ()
+        runCabal2Nix ref argsFormatted p
   hPutStrLn stderr $ "Processing... 100%"
   forM_ [ k | Left k <- errors ] $ \(k,m) ->
     hPutStrLn stderr $ "Error in: " ++ concat k ++ ", messsage: " ++ m
   dmap <- M.toList <$> readIORef ref
   let xs = flip map dmap $ \(name, d) -> do
-        show name ++ " = callPackage (" ++ show (pPrint d) ++ ");\n"
+        show name ++ " = callPackage (" ++ show (pPrint d) ++ "){};\n"
       prelude = unlines [ "/* stackage-packages.nix is an auto-generated file -- DO NOT EDIT! */"
                         , "{ pkgs, stdenv, callPackage }:"
                         , "self: {"
@@ -85,3 +80,24 @@ main = do
 toCabal :: [Char] -> [Char] -> [Char]
 toCabal p v = "cabal://" ++ p ++ "-" ++ v
 
+toCabal' :: [Char] -> [Char]
+toCabal' p = "cabal://" ++ p
+
+runCabal2Nix ::
+  Ord k =>
+  IORef (Map k Derivation)
+  -> [String] -> k -> IO (Either ([String], String) ())
+runCabal2Nix ref argsFormatted depName = do
+  result <- try $ cabal2nix' argsFormatted
+  case result of
+    Left (e :: SomeException) -> do
+      pure $ Left (argsFormatted,  show e)
+    Right d ->
+      case d of
+        Left _ ->
+          pure $ Left (argsFormatted,  "Incorrect arguments to cabal2nix")
+        Right d' -> do
+          let upd = d' & benchmarkDepends .~ mempty
+                       & testDepends .~ mempty
+          modifyIORef' ref (M.insert depName upd)
+          pure $ Right ()
